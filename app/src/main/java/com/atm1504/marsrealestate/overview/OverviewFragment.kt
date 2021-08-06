@@ -9,15 +9,21 @@ import com.atm1504.marsrealestate.databinding.FragmentOverviewBinding
 
 class OverviewFragment : Fragment() {
 
-    private val viewModel: OverviewViewModel by lazy {
-        ViewModelProvider(this).get(OverviewViewModel::class.java)
-    }
-
+    private lateinit var viewModel: OverviewViewModel
+   // private lateinit var binding: FragmentOverviewBinding
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-        val binding = FragmentOverviewBinding.inflate(inflater)
+       val binding = FragmentOverviewBinding.inflate(inflater)
+
+        val application = requireNotNull(activity).application
+
+        val viewModelFactory = OverviewViewModelFactory(application)
+        viewModel =
+            ViewModelProvider(
+                this, viewModelFactory
+            ).get(OverviewViewModel::class.java)
 
         // Allows Data Binding to Observe LiveData with the lifecycle of this Fragment
         binding.lifecycleOwner = this
