@@ -13,12 +13,13 @@ import kotlinx.coroutines.launch
 
 class OverviewViewModel(app: Application) : AndroidViewModel(app) {
 
+    enum class MarsApiStatus { LOADING, ERROR, DONE }
+
     @SuppressLint("StaticFieldLeak")
     private val context = getApplication<Application>().applicationContext
 
-    private val _status = MutableLiveData<String>()
-
-    val status: LiveData<String>
+    private val _status = MutableLiveData<MarsApiStatus>()
+    val status: LiveData<MarsApiStatus>
         get() = _status
 
     private val _properties = MutableLiveData<List<MarsProperty>>()
@@ -30,19 +31,20 @@ class OverviewViewModel(app: Application) : AndroidViewModel(app) {
         getMarsRealEstateProperties()
     }
 
-
     private fun getMarsRealEstateProperties() {
 
         viewModelScope.launch {
             try {
+                _status.value = MarsApiStatus.LOADING
                 val listResult = MarsApi.retrofitService.getProperties()
-                if (listResult.isNotEmpty()) {
-                    _properties.value = listResult
-                }
+                _properties.value = listResult
+                _status.value = MarsApiStatus.DONE
+
             } catch (e: Exception) {
                 Toast.makeText(context, "Error occurred while fetching data", Toast.LENGTH_LONG)
                     .show()
-                _status.value = "Failure: ${e.message}"
+                _status.value = MarsApiStatus.ERROR
+                _properties.value = ArrayList()
             }
         }
     }
