@@ -2,23 +2,26 @@ package com.atm1504.marsrealestate.overview
 
 import android.annotation.SuppressLint
 import android.app.Application
+import android.util.Log
 import android.widget.Toast
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
 import com.atm1504.marsrealestate.network.MarsApi
+import com.atm1504.marsrealestate.network.MarsApiFilter
 import com.atm1504.marsrealestate.network.MarsProperty
 import kotlinx.coroutines.launch
 
 class OverviewViewModel(app: Application) : AndroidViewModel(app) {
 
+    enum class MarsApiStatus { LOADING, ERROR, DONE }
+
     @SuppressLint("StaticFieldLeak")
     private val context = getApplication<Application>().applicationContext
 
-    private val _status = MutableLiveData<String>()
-
-    val status: LiveData<String>
+    private val _status = MutableLiveData<MarsApiStatus>()
+    val status: LiveData<MarsApiStatus>
         get() = _status
 
     private val _properties = MutableLiveData<List<MarsProperty>>()
@@ -26,24 +29,44 @@ class OverviewViewModel(app: Application) : AndroidViewModel(app) {
     val properties: LiveData<List<MarsProperty>>
         get() = _properties
 
+    private val _navigateToSelectedProperty = MutableLiveData<MarsProperty?>()
+
+    val navigateToSelectedProperty: LiveData<MarsProperty?>
+        get() = _navigateToSelectedProperty
+
     init {
-        getMarsRealEstateProperties()
+        _navigateToSelectedProperty.value = null
+        getMarsRealEstateProperties(MarsApiFilter.SHOW_ALL)
     }
 
-
-    private fun getMarsRealEstateProperties() {
+    private fun getMarsRealEstateProperties(filter: MarsApiFilter) {
 
         viewModelScope.launch {
             try {
-                val listResult = MarsApi.retrofitService.getProperties()
-                if (listResult.isNotEmpty()) {
-                    _properties.value = listResult
-                }
+                _status.value = MarsApiStatus.LOADING
+                val listResult = MarsApi.retrofitService.getProperties(filter.value)
+                _properties.value = listResult
+                _status.value = MarsApiStatus.DONE
+
             } catch (e: Exception) {
                 Toast.makeText(context, "Error occurred while fetching data", Toast.LENGTH_LONG)
                     .show()
-                _status.value = "Failure: ${e.message}"
+                Log.e("ATM", e.message.toString())
+                _status.value = MarsApiStatus.ERROR
+                _properties.value = ArrayList()
             }
         }
+    }
+
+    fun displayPropertyDetails(marsProperty: MarsProperty) {
+        _navigateToSelectedProperty.value = marsProperty
+    }
+
+    fun displayPropertyDetailsComplete() {
+        _navigateToSelectedProperty.value = null
+    }
+
+    fun updateFilter(filter: MarsApiFilter) {
+        getMarsRealEstateProperties(filter)
     }
 }
