@@ -6,11 +6,10 @@ import android.widget.Toast
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
+import androidx.lifecycle.viewModelScope
 import com.atm1504.marsrealestate.network.MarsApi
 import com.atm1504.marsrealestate.network.MarsProperty
-import retrofit2.Call
-import retrofit2.Callback
-import retrofit2.Response
+import kotlinx.coroutines.launch
 
 class OverviewViewModel(app: Application) : AndroidViewModel(app) {
 
@@ -29,18 +28,14 @@ class OverviewViewModel(app: Application) : AndroidViewModel(app) {
 
     private fun getMarsRealEstateProperties() {
 
-        MarsApi.retrofitService.getProperties().enqueue(object : Callback<List<MarsProperty>> {
-            override fun onFailure(call: Call<List<MarsProperty>>, t: Throwable) {
-                // _response.value = "Failure: " + t.message
-                Toast.makeText(context, "Error occurred: " + t.message, Toast.LENGTH_SHORT).show()
+        viewModelScope.launch {
+            try {
+                val listResult = MarsApi.retrofitService.getProperties()
+                _response.value = listResult
+            } catch (e: Exception) {
+                Toast.makeText(context, "Error occurred while fetching data", Toast.LENGTH_LONG)
+                    .show()
             }
-
-            override fun onResponse(
-                call: Call<List<MarsProperty>>,
-                response: Response<List<MarsProperty>>
-            ) {
-                _response.value = response.body()
-            }
-        })
+        }
     }
 }
