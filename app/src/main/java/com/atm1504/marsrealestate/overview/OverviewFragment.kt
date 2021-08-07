@@ -36,7 +36,10 @@ class OverviewFragment : Fragment() {
 
         // Setup recyclerview
         val manager = GridLayoutManager(context, 2)
-        val adapter = PhotoGridAdapter()
+        val adapter = PhotoGridAdapter(OnClickListener {
+            viewModel.displayPropertyDetails(it)
+        })
+
         binding.photosGrid.adapter = adapter
         binding.photosGrid.layoutManager = manager
         viewModel.properties.observe(viewLifecycleOwner, Observer {
