@@ -3,7 +3,9 @@ package com.atm1504.marsrealestate.overview
 import android.os.Bundle
 import android.view.*
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
+import androidx.recyclerview.widget.GridLayoutManager
 import com.atm1504.marsrealestate.R
 import com.atm1504.marsrealestate.databinding.FragmentOverviewBinding
 
@@ -17,7 +19,6 @@ class OverviewFragment : Fragment() {
         savedInstanceState: Bundle?
     ): View {
         binding = FragmentOverviewBinding.inflate(inflater)
-        //val binding = GridViewItemBinding.inflate(inflater)
 
         val application = requireNotNull(activity).application
 
@@ -33,7 +34,16 @@ class OverviewFragment : Fragment() {
         // Giving the binding access to the OverviewViewModel
         binding.viewModel = viewModel
 
-        binding.photosGrid.adapter = PhotoGridAdapter()
+        // Setup recyclerview
+        val manager = GridLayoutManager(context, 2)
+        val adapter = PhotoGridAdapter()
+        binding.photosGrid.adapter = adapter
+        binding.photosGrid.layoutManager = manager
+        viewModel.properties.observe(viewLifecycleOwner, Observer {
+            it?.let {
+                adapter.submitList(it)
+            }
+        })
 
         setHasOptionsMenu(true)
         return binding.root
