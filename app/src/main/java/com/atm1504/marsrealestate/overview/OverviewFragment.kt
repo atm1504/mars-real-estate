@@ -6,16 +6,20 @@ import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import com.atm1504.marsrealestate.R
 import com.atm1504.marsrealestate.databinding.FragmentOverviewBinding
+import com.atm1504.marsrealestate.databinding.GridViewItemBinding
 
 class OverviewFragment : Fragment() {
 
     private lateinit var viewModel: OverviewViewModel
    // private lateinit var binding: FragmentOverviewBinding
+
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-       val binding = FragmentOverviewBinding.inflate(inflater)
+      // binding = FragmentOverviewBinding.inflate(inflater)
+
+       val binding = GridViewItemBinding.inflate(inflater)
 
         val application = requireNotNull(activity).application
 

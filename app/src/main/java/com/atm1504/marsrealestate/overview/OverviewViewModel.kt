@@ -16,10 +16,15 @@ class OverviewViewModel(app: Application) : AndroidViewModel(app) {
     @SuppressLint("StaticFieldLeak")
     private val context = getApplication<Application>().applicationContext
 
-    private val _response = MutableLiveData<List<MarsProperty>>()
+    private val _status = MutableLiveData<String>()
 
-    val response: LiveData<List<MarsProperty>>
-        get() = _response
+    val status: LiveData<String>
+        get() = _status
+
+    private val _property = MutableLiveData<MarsProperty>()
+
+    val property: LiveData<MarsProperty>
+        get() = _property
 
     init {
         getMarsRealEstateProperties()
@@ -31,10 +36,13 @@ class OverviewViewModel(app: Application) : AndroidViewModel(app) {
         viewModelScope.launch {
             try {
                 val listResult = MarsApi.retrofitService.getProperties()
-                _response.value = listResult
+                if (listResult.isNotEmpty()) {
+                    _property.value = listResult[0]
+                }
             } catch (e: Exception) {
                 Toast.makeText(context, "Error occurred while fetching data", Toast.LENGTH_LONG)
                     .show()
+                _status.value = "Failure: ${e.message}"
             }
         }
     }
