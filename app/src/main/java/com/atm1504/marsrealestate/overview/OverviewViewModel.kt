@@ -27,7 +27,13 @@ class OverviewViewModel(app: Application) : AndroidViewModel(app) {
     val properties: LiveData<List<MarsProperty>>
         get() = _properties
 
+    private val _navigateToSelectedProperty = MutableLiveData<MarsProperty?>()
+
+    val navigateToSelectedProperty: LiveData<MarsProperty?>
+        get() = _navigateToSelectedProperty
+
     init {
+        _navigateToSelectedProperty.value = null
         getMarsRealEstateProperties()
     }
 
@@ -47,5 +53,13 @@ class OverviewViewModel(app: Application) : AndroidViewModel(app) {
                 _properties.value = ArrayList()
             }
         }
+    }
+
+    fun displayPropertyDetails(marsProperty: MarsProperty) {
+        _navigateToSelectedProperty.value = marsProperty
+    }
+
+    fun displayPropertyDetailsComplete() {
+        _navigateToSelectedProperty.value = null
     }
 }
